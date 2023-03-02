@@ -1,8 +1,6 @@
 #pragma once
 
-#include <mutex>
 #include <shared_mutex>
-#include <vector>
 
 #include "board.hpp"
 

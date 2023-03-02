@@ -2,10 +2,8 @@
 
 #include <thread>
 
-#include "board.hpp"
 #include "concurrent_queue.hpp"
 #include "game.hpp"
-#include "pattern_list.hpp"
 #include "scope_guard.hpp"
 
 inline long long next_permutation(long long mask) {

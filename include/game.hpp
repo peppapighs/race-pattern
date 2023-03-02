@@ -1,6 +1,5 @@
 #pragma once
 
-#include "board.hpp"
 #include "pattern_list.hpp"
 
 struct move_t {

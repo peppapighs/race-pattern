@@ -1,8 +1,5 @@
 #pragma once
 
-#include <sstream>
-#include <vector>
-
 const int BOARD_ROW = 6;
 const int BOARD_COL = 6;
 
