@@ -12,7 +12,8 @@ int main(int argc, char **argv) {
     options.add_options()("h,help", "print usage")(
         "t,thread", "thread count", cxxopts::value<int>()->default_value("4"))(
         "r,row", "maximum row to search",
-        cxxopts::value<int>()->default_value("3"));
+        cxxopts::value<int>()->default_value("3"))("i,input",
+                                                   "manually add patterns");
 
     auto args = options.parse(argc, argv);
 
@@ -27,13 +28,27 @@ int main(int argc, char **argv) {
     for (int i = 1; i <= args["row"].as<int>(); i++)
         for (int j = 1; j <= BOARD_COL; j++)
             pattern_finder.add_pattern(i, j);
-    auto patterns = pattern_finder.get_patterns();
 
     auto end = std::chrono::high_resolution_clock::now();
 
+    if (args.count("input")) {
+        int row;
+        while (std::cin >> row) {
+            std::vector<std::string> input(row);
+            for (int i = 0; i < row; i++)
+                std::cin >> input[i];
+            pattern_finder.add_pattern(board::parse(input));
+        }
+    }
+
+    auto patterns = pattern_finder.get_patterns();
     for (auto &pattern : patterns)
-        std::cout << "(" << pattern.first.b_mask << ", " << pattern.first.w_mask
-                  << ", " << pattern.second << ")," << std::endl;
+        std::cout << "(" << pattern.second.b_mask << ", "
+                  << pattern.second.w_mask << ", " << pattern.first << "),"
+                  << std::endl;
+
+    for (auto &pattern : patterns)
+        std::cerr << board::to_string(pattern.second, true) << std::endl;
 
     std::cerr << "Total patterns: " << patterns.size() << std::endl;
     std::cerr << "Time taken: "

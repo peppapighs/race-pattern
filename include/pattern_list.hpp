@@ -6,7 +6,7 @@
 
 class PatternList {
   private:
-    std::vector<std::pair<board_t, int>> patterns;
+    std::vector<std::pair<int, board_t>> patterns;
     mutable std::shared_mutex mutex;
 
   public:
@@ -14,8 +14,8 @@ class PatternList {
         board_t board = board::pad(pattern, 0, BOARD_COL - pattern.col,
                                    BOARD_ROW - pattern.row);
         std::shared_lock<std::shared_mutex> lock(mutex);
-        auto p = [&](const std::pair<board_t, int> &b) {
-            return board::is_subset(board, b.first);
+        auto p = [&](const std::pair<int, board_t> &b) {
+            return board::is_subset(board, b.second);
         };
         return std::find_if(patterns.begin(), patterns.end(), p) !=
                patterns.end();
@@ -26,24 +26,24 @@ class PatternList {
             if (contains(board))
                 continue;
             std::unique_lock<std::shared_mutex> lock(mutex);
-            patterns.emplace_back(board, pattern.row - 1);
+            patterns.emplace_back(pattern.row - 1, board);
         }
         for (auto &board : board::expand(board::flip(pattern))) {
             if (contains(board))
                 continue;
             std::unique_lock<std::shared_mutex> lock(mutex);
-            patterns.emplace_back(board, pattern.row - 1);
+            patterns.emplace_back(pattern.row - 1, board);
         }
     }
 
-    std::vector<std::pair<board_t, int>> get_patterns() {
+    std::vector<std::pair<int, board_t>> get_patterns() {
         std::sort(patterns.begin(), patterns.end());
 
-        std::vector<std::pair<board_t, int>> ret;
+        std::vector<std::pair<int, board_t>> ret;
 
         for (auto &pattern : patterns) {
-            auto p = [&](const std::pair<board_t, int> &b) {
-                return board::is_subset(pattern.first, b.first);
+            auto p = [&](const std::pair<int, board_t> &b) {
+                return board::is_subset(pattern.second, b.second);
             };
             if (std::find_if(ret.begin(), ret.end(), p) != ret.end())
                 continue;

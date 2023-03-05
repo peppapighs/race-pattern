@@ -62,6 +62,22 @@ std::string to_string(const board_t &board, bool is_pattern = true) {
     return ss.str();
 }
 
+board_t parse(const std::vector<std::string> &input, bool is_pattern = true) {
+    int row = input.size(), col = input[0].size();
+    long long b_mask = 0, w_mask = 0;
+    for (int i = 0; i < row; i++)
+        for (int j = 0; j < col; j++) {
+            int idx = i * col + j;
+            if (input[i][j] == 'B') {
+                b_mask |= 1LL << idx;
+                w_mask |= 1LL << (row * col - 1 - idx);
+            } else if (input[i][j] == (is_pattern ? 'P' : '_'))
+                w_mask |= 1LL << (row * col - 1 - idx);
+        }
+    w_mask = (1LL << (row * col)) - 1 - w_mask;
+    return {row, col, b_mask, w_mask};
+}
+
 board_t flip(const board_t &board) {
     long long b_mask = 0, w_mask = 0;
     for (int i = 0; i < board.row; i++)

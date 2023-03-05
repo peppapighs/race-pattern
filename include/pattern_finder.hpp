@@ -28,8 +28,10 @@ class PatternFinder {
 
             if (pattern_list.contains(board))
                 continue;
-            if (game::is_winnable(board, pattern_list))
+            if (game::is_winnable(board, pattern_list)) {
+                std::cerr << board::to_string(board) << std::endl;
                 pattern_list.add(board);
+            }
         }
     }
 
@@ -42,25 +44,32 @@ class PatternFinder {
     ~PatternFinder() { queue.terminate(); }
 
     void add_pattern(int row, int col, int row_limit = 1) {
-        for (long long b_mask = 1; b_mask < 1LL << (row_limit * col);
-             b_mask++) {
-            long long rev_b_mask = 0;
-            for (int i = 0; i < row_limit * col; i++)
-                if (b_mask & 1LL << i)
-                    rev_b_mask |= 1LL << (row * col - 1 - i);
-            for (int p_cnt = row * col; p_cnt > 0; p_cnt--)
-                for (long long w_mask = (1LL << p_cnt) - 1;
-                     w_mask < 1LL << (row * col);
-                     w_mask = next_permutation(w_mask))
-                    if ((~w_mask & rev_b_mask) == rev_b_mask) {
-                        board_t board = {row, col, b_mask, w_mask};
-                        queue.push(board);
-                    }
-        }
+        for (int b_cnt = 1; b_cnt <= row_limit * col; b_cnt++)
+            for (long long b_mask = (1LL << b_cnt) - 1;
+                 b_mask < 1LL << (row_limit * col);
+                 b_mask = next_permutation(b_mask)) {
+                long long rev_b_mask = 0;
+                for (int i = 0; i < row_limit * col; i++)
+                    if (b_mask & 1LL << i)
+                        rev_b_mask |= 1LL << (row * col - 1 - i);
+                for (int p_cnt = row * col; p_cnt > 0; p_cnt--)
+                    for (long long w_mask = (1LL << p_cnt) - 1;
+                         w_mask < 1LL << (row * col);
+                         w_mask = next_permutation(w_mask))
+                        if ((~w_mask & rev_b_mask) == rev_b_mask) {
+                            board_t board = {row, col, b_mask, w_mask};
+                            queue.push(board);
+                        }
+            }
         queue.join();
     }
 
-    std::vector<std::pair<board_t, int>> get_patterns() {
+    void add_pattern(const board_t &board) {
+        if (game::is_winnable(board, pattern_list))
+            pattern_list.add(board);
+    }
+
+    std::vector<std::pair<int, board_t>> get_patterns() {
         return pattern_list.get_patterns();
     }
 };
