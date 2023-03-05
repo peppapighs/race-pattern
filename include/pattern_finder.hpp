@@ -4,6 +4,7 @@
 
 #include "concurrent_queue.hpp"
 #include "game.hpp"
+#include "io.hpp"
 #include "scope_guard.hpp"
 
 inline long long next_permutation(long long mask) {
@@ -13,6 +14,8 @@ inline long long next_permutation(long long mask) {
 
 class PatternFinder {
   private:
+    bool verbose;
+
     concurrent_queue<board_t> queue;
     std::vector<std::jthread> threads;
 
@@ -29,14 +32,15 @@ class PatternFinder {
             if (pattern_list.contains(board))
                 continue;
             if (game::is_winnable(board, pattern_list)) {
-                std::cerr << board::to_string(board) << std::endl;
+                if (verbose)
+                    SyncCerr{} << board::to_string(board) << std::endl;
                 pattern_list.add(board);
             }
         }
     }
 
   public:
-    PatternFinder(int thread_count) {
+    PatternFinder(int thread_count, bool verbose = false) : verbose(verbose) {
         for (int i = 0; i < thread_count; i++)
             threads.emplace_back(&PatternFinder::worker_thread, this);
     }
